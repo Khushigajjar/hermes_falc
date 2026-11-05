@@ -1,0 +1,98 @@
+{
+  "n_pairs": 100,
+  "sample_seed": 42,
+  "high_priority_rules": [
+    "CPM1",
+    "CPM2",
+    "MP8"
+  ],
+  "sets": {
+    "wiki": {
+      "n_texts": 100,
+      "mean_score": 62.5,
+      "pct_fail_any_high_priority": 99.0,
+      "pct_fail_CPM1_or_CPM2": 99.0,
+      "pct_fail_any_rule_excl_MP8": 100.0,
+      "pct_fully_pass_excl_MP8": 0.0,
+      "pct_fail_any_rule": 100.0,
+      "pct_fully_pass": 0.0,
+      "fail_rate_per_rule_pct": {
+        "CPM1": 93.0,
+        "CPM2": 81.0,
+        "CPM8": 0.0,
+        "CPM9": 1.0,
+        "CPM12": 2.0,
+        "CPM13": 34.0,
+        "CPM14": 60.0,
+        "CPM15": 63.0,
+        "CPM16": 8.0,
+        "CPM17": 6.0,
+        "CPM18": 2.0,
+        "CPM19": 0.0,
+        "CPM20": 15.0,
+        "CPM21": 3.0,
+        "MP5": 2.0,
+        "MP7": 2.0,
+        "MP8": 53.0
+      }
+    },
+    "viki": {
+      "n_texts": 100,
+      "mean_score": 69.3,
+      "pct_fail_any_high_priority": 92.0,
+      "pct_fail_CPM1_or_CPM2": 86.0,
+      "pct_fail_any_rule_excl_MP8": 95.0,
+      "pct_fully_pass_excl_MP8": 5.0,
+      "pct_fail_any_rule": 97.0,
+      "pct_fully_pass": 3.0,
+      "fail_rate_per_rule_pct": {
+        "CPM1": 70.0,
+        "CPM2": 69.0,
+        "CPM8": 0.0,
+        "CPM9": 4.0,
+        "CPM12": 0.0,
+        "CPM13": 39.0,
+        "CPM14": 32.0,
+        "CPM15": 35.0,
+        "CPM16": 5.0,
+        "CPM17": 4.0,
+        "CPM18": 1.0,
+        "CPM19": 0.0,
+        "CPM20": 14.0,
+        "CPM21": 0.0,
+        "MP5": 1.0,
+        "MP7": 1.0,
+        "MP8": 58.0
+      }
+    },
+    "viki_simple": {
+      "n_texts": 58,
+      "mean_score": 68.8,
+      "pct_fail_any_high_priority": 91.4,
+      "pct_fail_CPM1_or_CPM2": 86.2,
+      "pct_fail_any_rule_excl_MP8": 94.8,
+      "pct_fully_pass_excl_MP8": 5.2,
+      "pct_fail_any_rule": 96.6,
+      "pct_fully_pass": 3.4,
+      "fail_rate_per_rule_pct": {
+        "CPM1": 63.8,
+        "CPM2": 69.0,
+        "CPM8": 0.0,
+        "CPM9": 5.2,
+        "CPM12": 0.0,
+        "CPM13": 43.1,
+        "CPM14": 34.5,
+        "CPM15": 25.9,
+        "CPM16": 6.9,
+        "CPM17": 3.4,
+        "CPM18": 1.7,
+        "CPM19": 0.0,
+        "CPM20": 13.8,
+        "CPM21": 0.0,
+        "MP5": 0.0,
+        "MP7": 0.0,
+        "MP8": 67.2
+      }
+    }
+  }
+}

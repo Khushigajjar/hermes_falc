@@ -1,0 +1,1261 @@
+
+{
+  "meta": {
+    "name": "HERMES FALC rulebook",
+    "version": "0.1",
+    "language": "fr",
+    "source": "Grille d'évaluation des documents FALC (adaptation of the Pathways / Inclusion Europe checklist), file liste_verification-falc-score_v2020-01-14",
+    "source_license": "CC-BY-SA",
+    "fields": {
+      "criterion_fr / explanation_fr / priority / wcag_rgaa": "copied from the official checklist",
+      "applies_to, check_mode, phase, detector, violation_definition, llm_instruction_fr, examples": "added by the Hermes team (technical layer)",
+      "params with status team_proposal": "numeric thresholds NOT given by the checklist; to validate"
+    },
+    "phases": {
+      "1": "automatic checks on text (spaCy, regex, lexicons): build first",
+      "2": "semi-automatic: LLM judge or combined checks",
+      "3": "needs document structure or human review",
+      "out_of_scope": "layout and images: not checked on plain text (future docx/pdf inspection)"
+    },
+    "rule_count": 57,
+    "rules_per_phase": {
+      "3": 3,
+      "2": 16,
+      "1": 17,
+      "out_of_scope": 21
+    }
+  },
+  "scoring": {
+    "weights": {
+      "+++": 3,
+      "++": 2,
+      "+": 1
+    },
+    "formula": "score = sum(weight of passed applicable rules) / sum(weight of applicable rules) * 100",
+    "result_values": [
+      "pass",
+      "fail",
+      "not_applicable"
+    ],
+    "note": "Same logic as the official sheet (3/2/1 points). not_applicable rules are removed from numerator and denominator.",
+    "report_by_priority": [
+      "+++",
+      "++",
+      "+"
+    ]
+  },
+  "result_schema_example": {
+    "sentence_id": "s12",
+    "rule_id": "CPM13",
+    "result": "fail",
+    "evidence": "recevrez ... envoyée par",
+    "span": [
+      8,
+      41
+    ],
+    "suggestion": null
+  },
+  "categories": {
+    "CI": "information_choice",
+    "CPM": "sentence_and_word_construction",
+    "I": "illustrations",
+    "MP": "layout"
+  },
+  "rules": [
+    {
+      "id": "CI1",
+      "category": "information_choice",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "Les personnes handicapées intellectuelles ont-elles été impliquées dans l'écriture ?",
+      "explanation_fr": "Les personnes handicapées intellectuelles peuvent être impliquées à toutes les étapes de l'écriture : choix du sujet, relecture et écriture. Elles doivent être au minimum impliquées à la relecture pour vérifier la bonne compréhension des messages. Vous ferez figurer sur le document \"relecture réalisée par des personnes handicapées de la structure XXX\". Nous vous conseillons de conserver une trace des scéances de relecture, par exemple les feuilles d'émargement.",
+      "wcag_rgaa": null,
+      "applies_to": "process",
+      "check_mode": "human",
+      "phase": 3,
+      "detector": {
+        "type": "manual_evidence",
+        "evidence": "review log / attendance sheet"
+      },
+      "violation_definition": "No evidence that people with intellectual disabilities reviewed the document.",
+      "notes": "Cannot be automated. Hermes can only record that the human review step happened."
+    },
+    {
+      "id": "CI2",
+      "category": "information_choice",
+      "priority": "++",
+      "weight": 2,
+      "criterion_fr": "L'auteur donne-t-il toutes les informations nécessaires : à qui s'adresse le document, de quoi parle-t-il... ?",
+      "explanation_fr": "Le texte du document doit répondre à des objectifs clairs, et peu nombreux. Le document doit s'adresser à un public cible précis. Il faut définir cela avant de rédiger afin de bien choisir les bonnes informations du document.",
+      "wcag_rgaa": null,
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "llm_judge",
+        "question": "Does the document state who it is for and what it is about?"
+      },
+      "violation_definition": "Audience or subject is not stated."
+    },
+    {
+      "id": "CI3",
+      "category": "information_choice",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Donner trop d'informations peut créer la confusion. Il ne faut donner que les informations importantes. Ce critère est-il respecté ?",
+      "explanation_fr": "Il est important de bien décider du niveau de détail attendu.",
+      "wcag_rgaa": null,
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "llm_judge",
+        "question": "Does the text keep only the important information?"
+      },
+      "violation_definition": "Text contains secondary details that blur the main message."
+    },
+    {
+      "id": "CI4",
+      "category": "information_choice",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "Les informations sont-elles placées dans un ordre facile à suivre et à comprendre ?",
+      "explanation_fr": "Il faut respecter un ordre logique et chronologique.",
+      "wcag_rgaa": null,
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "llm_judge",
+        "question": "Is the information in a logical, chronological order?"
+      },
+      "violation_definition": "Order is hard to follow."
+    },
+    {
+      "id": "CI5",
+      "category": "information_choice",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "L'information principale est-elle facile à trouver ?",
+      "explanation_fr": "Vous devez placer les informations principales en début de document. Vous pouvez aussi mettre les informations principales en gras.",
+      "wcag_rgaa": "Correspondance partielle WCAG : 2.4.1, 3.2.3 RGAA : 12.10 et 12.11",
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "llm_judge",
+        "question": "Is the main information at the start of the document?"
+      },
+      "violation_definition": "Main information is buried."
+    },
+    {
+      "id": "CI6",
+      "category": "information_choice",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Les informations qui parlent de la même chose sont-elles regroupées ensemble ?",
+      "explanation_fr": "Vous devez regrouper les informations sur un même sujet dans le même paragraphe .",
+      "wcag_rgaa": "Correspondance partielle WCAG : 1.3.1 RGAA : 11.5",
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "llm_judge",
+        "question": "Is information about the same topic grouped in the same paragraph?"
+      },
+      "violation_definition": "Same topic is spread over several paragraphs."
+    },
+    {
+      "id": "CI7",
+      "category": "information_choice",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Les titres sont-ils clairs et faciles à comprendre ?",
+      "explanation_fr": "Un titre doit annoncer clairement ce qu'il y a dans le document et avoir du sens. Il faut éviter les titres généralistes.",
+      "wcag_rgaa": "WCAG : SC 2.4.6 RGAA : –",
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "llm_judge",
+        "question": "Are titles clear, meaningful, not generic?"
+      },
+      "violation_definition": "Title is generic or unclear."
+    },
+    {
+      "id": "CI8",
+      "category": "information_choice",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Les informations importantes sont-elles répétées ?",
+      "explanation_fr": "En fonction de la longueur du document, il faut identifier les informations importantes.",
+      "wcag_rgaa": null,
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "llm_judge",
+        "question": "Are the important pieces of information repeated (long documents)?"
+      },
+      "violation_definition": "Key information appears only once in a long document."
+    },
+    {
+      "id": "CI9",
+      "category": "information_choice",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Essayer de ne pas utiliser trop de sous-titres ou de points comme par exemple 1.2.1. Ce critère est-il respecté ?",
+      "explanation_fr": "Il est conseillé de limiter les niveau de sous-titres à 2 niveaux. Au-delà les lecteurs auront du mal à se repérer.",
+      "wcag_rgaa": null,
+      "applies_to": "document",
+      "check_mode": "automatic",
+      "phase": 3,
+      "detector": {
+        "type": "heading_depth",
+        "params": {
+          "max_depth": 2
+        }
+      },
+      "violation_definition": "Heading depth is greater than max_depth (e.g. 1.2.1).",
+      "notes": "Needs structured input (docx, markdown, html)."
+    },
+    {
+      "id": "CI10",
+      "category": "information_choice",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "À part pour citer ses sources, il ne faut pas utiliser de notes de bas de page. Ce critère est-il respecté ?",
+      "explanation_fr": "Les notes de bas de page interrompent le fil de la lecture. Si l'information est importante, il faut l'intégrer dans la phrase. Cette règle ne concerne pas les sources dont on peut se passer dans le fil de la lecture.",
+      "wcag_rgaa": null,
+      "applies_to": "document",
+      "check_mode": "automatic",
+      "phase": 3,
+      "detector": {
+        "type": "footnote_detection",
+        "input": "docx / html"
+      },
+      "violation_definition": "Footnotes used for content other than sources.",
+      "notes": "Footnotes that only cite sources are allowed."
+    },
+    {
+      "id": "CPM1",
+      "category": "sentence_and_word_construction",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "Les phrases sont-elles courtes ?",
+      "explanation_fr": "On peut utiliser la forme « sujet-verbe-complément. »",
+      "wcag_rgaa": null,
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "spacy_metrics",
+        "tool": "spaCy fr_core_news_md (or _lg)",
+        "signals": [
+          "n_words",
+          "n_finite_verbs",
+          "n_subordinate_clauses (deps: advcl, acl, ccomp)"
+        ],
+        "params": {
+          "max_words": 15,
+          "max_finite_verbs": 1,
+          "status": "team_proposal_to_validate_with_professor"
+        }
+      },
+      "violation_definition": "Sentence has more than max_words words or more than max_finite_verbs finite verbs.",
+      "llm_instruction_fr": "Écris des phrases courtes, de forme sujet - verbe - complément. Une seule idée par phrase.",
+      "notes": "The checklist gives no numeric limit: the thresholds are ours and must be validated."
+    },
+    {
+      "id": "CPM2",
+      "category": "sentence_and_word_construction",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "Les mots sont-ils faciles à comprendre ?",
+      "explanation_fr": "Il faut utiliser des mots simples et compris par les personnes cibles.",
+      "wcag_rgaa": "Correspondance partielle WCAG : 3.1.5 (niveau de lecture) RGAA : 13.14",
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "lexicon_lookup",
+        "resources": [
+          "FLELex/CEFRLex",
+          "ReSyf",
+          "word frequency list"
+        ],
+        "params": {
+          "max_cefr_level": "B1",
+          "min_zipf_frequency": 3.5,
+          "status": "team_proposal_to_validate"
+        }
+      },
+      "violation_definition": "Content word above max_cefr_level or below the frequency threshold.",
+      "llm_instruction_fr": "Utilise des mots simples et courants que le public cible comprend.",
+      "notes": "Feeds the lexical memory: validated human replacements are stored and reused."
+    },
+    {
+      "id": "CPM3",
+      "category": "sentence_and_word_construction",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "Les mots difficiles sont-ils clairement expliqués lorsque vous les utilisez ?",
+      "explanation_fr": "Si des mots difficiles sont utilisés, il faut donner une explication simple dès la première utilisation.",
+      "wcag_rgaa": "WCAG : 3.1.3 (mots rares) RGAA : 13.9, 13.10",
+      "applies_to": "sentence",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "combined",
+        "steps": [
+          "detect difficult words with CPM2",
+          "look for a simple explanation at first use"
+        ]
+      },
+      "violation_definition": "Difficult word kept without a simple explanation at first use.",
+      "llm_instruction_fr": "Si un mot difficile est nécessaire, explique-le simplement dès sa première utilisation."
+    },
+    {
+      "id": "CPM4",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Les mots difficiles sont-ils expliqués plus d'une fois ?",
+      "explanation_fr": "En fonction de la longueur du document, il est important de répéter les explications des mots difficiles.",
+      "wcag_rgaa": "Correspondance partielle WCAG : 3.1.5 (niveau de lecture) et 3.1.3 (mots rares) RGAA : 13.14",
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "combined",
+        "steps": [
+          "list difficult words",
+          "check the explanation is repeated in long documents"
+        ]
+      },
+      "violation_definition": "Difficult word explained only once in a long document."
+    },
+    {
+      "id": "CPM5",
+      "category": "sentence_and_word_construction",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "Le langage utilisé est-il le plus adapté aux personnes qui vont utiliser l'information ?",
+      "explanation_fr": "Pour l'information à destination des adultes, il faut utiliser un langage pour adulte et non un langage pour enfant.",
+      "wcag_rgaa": null,
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "llm_judge",
+        "question": "Is the language suited to adults, not childish?"
+      },
+      "violation_definition": "Child-oriented language for an adult audience.",
+      "llm_instruction_fr": "Utilise un langage simple mais adapté à des adultes, pas un langage d'enfant."
+    },
+    {
+      "id": "CPM6",
+      "category": "sentence_and_word_construction",
+      "priority": "++",
+      "weight": 2,
+      "criterion_fr": "Le même mot est-il utilisé tout au long du document pour décrire la même chose ?",
+      "explanation_fr": "Il est possible d'utiliser des répétitions avec le Facile à lire et à comprendre.",
+      "wcag_rgaa": null,
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "lemma_consistency",
+        "tool": "spaCy fr_core_news_md (or _lg)",
+        "extra": "synonym clusters from lexicons"
+      },
+      "violation_definition": "Several different words used for the same thing.",
+      "llm_instruction_fr": "Utilise toujours le même mot pour désigner la même chose. Les répétitions sont permises."
+    },
+    {
+      "id": "CPM7",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Il ne faut pas utiliser des idées difficiles et abstraites comme les métaphores. Ce critère est-il respecté ?",
+      "explanation_fr": "Evitez par exemple des tournures telles que : il pleut des corde, faire un tour de table ou encore avoir le cœur sur la main.",
+      "wcag_rgaa": "Correspondance partielle WCAG : 3.1.5 (niveau de lecture) RGAA : 13.14",
+      "applies_to": "sentence",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "expression_list_plus_llm",
+        "resources": [
+          "list of French idioms / metaphors"
+        ]
+      },
+      "violation_definition": "Metaphor or idiom detected.",
+      "llm_instruction_fr": "N'utilise pas de métaphores ni d'expressions imagées.",
+      "examples": {
+        "bad": "il pleut des cordes; avoir le coeur sur la main",
+        "good": null
+      }
+    },
+    {
+      "id": "CPM8",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Il ne faut pas utiliser de mots peu connus dans une langue étrangère. Ce critère est-il respecté ?",
+      "explanation_fr": "Evitez d'utiliser des anglissismes : meeting, overbooké, geek…",
+      "wcag_rgaa": "Correspondance partielle WCAG : 3.1.5 (niveau de lecture), 3.1.6 (prononciation) RGAA : 13.13, 13.14",
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "wordlist_plus_language_id",
+        "resources": [
+          "list of English words used in French",
+          "token-level language detection"
+        ]
+      },
+      "violation_definition": "Foreign or anglicism word detected.",
+      "llm_instruction_fr": "Évite les mots étrangers et les anglicismes.",
+      "examples": {
+        "bad": "meeting; overbooké; geek",
+        "good": null
+      }
+    },
+    {
+      "id": "CPM9",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Il ne faut pas utiliser de mots contractés, type texto. Ce critère est-il respecté ?",
+      "explanation_fr": "JTM = Je t'aime, Koi29 = Quoi de neuf ?",
+      "wcag_rgaa": "Pathways : – Correspondance partielle WCAG : 3.1.4 (abréviations) RGAA : 13.11",
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "regex_plus_wordlist",
+        "params": {
+          "pattern_hint": "tokens mixing letters and digits (e.g. Koi29), texto list (JTM)"
+        }
+      },
+      "violation_definition": "SMS-style contracted word detected.",
+      "llm_instruction_fr": "N'utilise pas de mots contractés de type SMS.",
+      "examples": {
+        "bad": "JTM; Koi29",
+        "good": null
+      }
+    },
+    {
+      "id": "CPM10",
+      "category": "sentence_and_word_construction",
+      "priority": "++",
+      "weight": 2,
+      "criterion_fr": "L'auteur s'adresse-t-il directement aux personnes à qui sont destinées les informations ?",
+      "explanation_fr": "Il est plus facile d'impliquer le lecteur quand on s'adresse directement à lui, en utilisant le \"vous\" par exemple.",
+      "wcag_rgaa": "Pathways : RG 15 p.11",
+      "applies_to": "document",
+      "check_mode": "automatic",
+      "phase": 2,
+      "detector": {
+        "type": "regex",
+        "params": {
+          "tokens": [
+            "vous",
+            "votre",
+            "vos"
+          ],
+          "applies_when": "audience == general public"
+        }
+      },
+      "violation_definition": "No direct address to the reader (no 'vous') when the audience is the reader.",
+      "llm_instruction_fr": "Adresse-toi directement au lecteur avec « vous » quand c'est adapté.",
+      "notes": "Depends on the document type, so keep it configurable."
+    },
+    {
+      "id": "CPM11",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Est-ce qu'on repère facilement à qui ou à quoi correspondent les pronoms ?",
+      "explanation_fr": "Il faut pouvoir repérer immédiatement à quoi fait référence le pronom.",
+      "wcag_rgaa": "Correspondance partielle WCAG : 3.1.5 (niveau de lecture) RGAA : 13.14",
+      "applies_to": "sentence",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "pronoun_check",
+        "tool": "spaCy fr_core_news_md (or _lg)",
+        "signals": [
+          "pronouns il/elle/ils/elles/cela/ce/ça",
+          "distance to antecedent",
+          "number of candidate antecedents"
+        ]
+      },
+      "violation_definition": "Pronoun whose reference is not immediately clear.",
+      "llm_instruction_fr": "Vérifie que chaque pronom renvoie clairement à une seule personne ou chose. Sinon répète le nom."
+    },
+    {
+      "id": "CPM12",
+      "category": "sentence_and_word_construction",
+      "priority": "++",
+      "weight": 2,
+      "criterion_fr": "Des phrases positives plutôt que négatives sont-elles utilisées chaque fois que possible ?",
+      "explanation_fr": "Les tournures négatives sont parfois compliquées à comprendre, attention donc à ne pas les multiplier car cela crée de la confusion.",
+      "wcag_rgaa": null,
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "spacy_negation",
+        "tool": "spaCy fr_core_news_md (or _lg)",
+        "signals": [
+          "ne ... pas/jamais/plus/rien/personne",
+          "sans",
+          "ne ... que"
+        ],
+        "params": {
+          "max_negations_per_sentence": 1
+        }
+      },
+      "violation_definition": "Negative form used when a positive form is possible.",
+      "llm_instruction_fr": "Préfère les phrases positives aux phrases négatives quand c'est possible.",
+      "notes": "'Whenever possible': treat as a warning, not a hard failure."
+    },
+    {
+      "id": "CPM13",
+      "category": "sentence_and_word_construction",
+      "priority": "++",
+      "weight": 2,
+      "criterion_fr": "La voix active est-elle utilisée à la place de la voix passive chaque fois que cela est possible ?",
+      "explanation_fr": "La voix active permet de faciliter la compréhension. Nous vous conseillons de privilégier les temps faciles à comprendre : le présent, le passé composé et le futur simple. Par exemple, dites \"Le médecin vous enverra une lettre\" plutôt que \"Vous recevrez une lettre envoyée par le médecin\".",
+      "wcag_rgaa": null,
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "spacy_dependency",
+        "tool": "spaCy fr_core_news_md (or _lg)",
+        "signals": [
+          "dep nsubj:pass",
+          "dep aux:pass",
+          "'par' agent complement"
+        ],
+        "extra": "also flag hard tenses (keep present, passé composé, futur simple)"
+      },
+      "violation_definition": "Passive voice detected.",
+      "llm_instruction_fr": "Utilise la voix active. Préfère le présent, le passé composé et le futur simple.",
+      "examples": {
+        "bad": "Vous recevrez une lettre envoyée par le médecin",
+        "good": "Le médecin vous enverra une lettre"
+      }
+    },
+    {
+      "id": "CPM14",
+      "category": "sentence_and_word_construction",
+      "priority": "++",
+      "weight": 2,
+      "criterion_fr": "La ponctuation est-elle simple ?",
+      "explanation_fr": "Une ponctuation simple va avec des phrases courtes. Par exemple, il faut éviter les points-virgules et les parenthèses.",
+      "wcag_rgaa": null,
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "regex",
+        "params": {
+          "forbidden_chars": [
+            ";",
+            "(",
+            ")",
+            "…"
+          ]
+        }
+      },
+      "violation_definition": "Semicolon, parentheses or other complex punctuation detected.",
+      "llm_instruction_fr": "Utilise une ponctuation simple. Pas de point-virgule ni de parenthèses."
+    },
+    {
+      "id": "CPM15",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Des puces ou des numéros sont-ils utilisées à la place de listes de mots séparés par des virgules ?",
+      "explanation_fr": "Les puces sont plus lisibles et permettent d'aérer le texte. Par exemple, écrivez : Les buts de la réunion sont : - se rencontrer, - apprendre de nouvelles choses - découvrir de nouveaux outils.",
+      "wcag_rgaa": "Correspondance partielle WCAG : SC 1.3.1 RGAA : 9.3",
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "spacy_enumeration",
+        "tool": "spaCy fr_core_news_md (or _lg)",
+        "params": {
+          "min_items_for_list": 3
+        },
+        "signals": [
+          "comma-separated enumeration with >= min_items"
+        ]
+      },
+      "violation_definition": "Enumeration written in a comma-separated sentence instead of bullets or numbers.",
+      "llm_instruction_fr": "Écris les énumérations sous forme de liste à puces ou numérotée.",
+      "examples": {
+        "bad": null,
+        "good": "Les buts de la réunion sont : - se rencontrer, - apprendre de nouvelles choses, - découvrir de nouveaux outils."
+      }
+    },
+    {
+      "id": "CPM16",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Les nombres sont-ils écrits en chiffres (1,2,3) et non en lettres ?",
+      "explanation_fr": "Vous devez écrire : 5 paires de gants et non cinq paires de gants.",
+      "wcag_rgaa": null,
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "spacy_plus_number_words",
+        "params": {
+          "language": "fr"
+        },
+        "signals": [
+          "number words (un, deux ... cent, mille)"
+        ]
+      },
+      "violation_definition": "Number written in letters instead of digits.",
+      "llm_instruction_fr": "Écris les nombres en chiffres.",
+      "examples": {
+        "bad": "cinq paires de gants",
+        "good": "5 paires de gants"
+      },
+      "notes": "Beware of 'un/une' as articles: only flag when used as a quantity."
+    },
+    {
+      "id": "CPM17",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Il faut éviter d'utiliser des sigles ou les expliquer lorsqu'on les utilise. Ce critère est-il respecté ?",
+      "explanation_fr": "Privilégiez toujours les mots entiers. Si ce n'est pas possible, il faut utiliser les initiales et les expliquer. Par exemple, si vous écrivez \"UE\", expliquez que cela signifie \"Union européenne\".",
+      "wcag_rgaa": "Correspondance partielle WCAG : 3.1.4 (abréviations) RGAA : 9.4 et 9.5",
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "regex_plus_lexicon",
+        "params": {
+          "pattern": "uppercase tokens of 2+ letters",
+          "lookup": "acronym list"
+        }
+      },
+      "violation_definition": "Acronym used without being spelled out.",
+      "llm_instruction_fr": "Évite les sigles. Si tu les utilises, explique-les la première fois.",
+      "examples": {
+        "bad": "UE",
+        "good": "Union européenne"
+      }
+    },
+    {
+      "id": "CPM18",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Il ne faut pas utiliser d'abréviations. Ce critère est-il respecté ?",
+      "explanation_fr": "Il faut éviter d'utiliser des abréviations. Par exemple, \"c'est-à-dire\" peut s'écrire en \"c.-à-d.\", et il vaut mieux écrire docteur plutôt que \"Dr\".",
+      "wcag_rgaa": null,
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "wordlist_plus_regex",
+        "params": {
+          "examples": [
+            "Dr",
+            "c.-à-d.",
+            "etc."
+          ]
+        }
+      },
+      "violation_definition": "Abbreviation detected.",
+      "llm_instruction_fr": "N'utilise pas d'abréviations. Écris les mots en entier.",
+      "examples": {
+        "bad": "Dr; c.-à-d.",
+        "good": "docteur; c'est-à-dire"
+      }
+    },
+    {
+      "id": "CPM19",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Les dates sont-elles écrites en toutes lettres ?",
+      "explanation_fr": "Pour les dates, la correspondance entre le nom du mois et son numéro, par exemple septembre et 09 n'est pas toujours simple à comprendre. Il vaut mieux écrire la date en entier par exemple mardi 12 septembre 2018.",
+      "wcag_rgaa": null,
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "date_regex",
+        "params": {
+          "forbidden": [
+            "dd/mm/yyyy",
+            "dd-mm-yy",
+            "yyyy-mm-dd"
+          ],
+          "required": "weekday? day month_name year"
+        }
+      },
+      "violation_definition": "Date written with numbers only, month not in letters.",
+      "llm_instruction_fr": "Écris les dates en toutes lettres avec le nom du mois.",
+      "examples": {
+        "bad": "12/09/2018",
+        "good": "mardi 12 septembre 2018"
+      },
+      "notes": "Also used by the preservation check: dates must not change between source and output."
+    },
+    {
+      "id": "CPM20",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Il faut limiter l'usage des pourcentages ou des grands nombres et toujours les expliciter. Ce critère est-il respecté ?",
+      "explanation_fr": "A la place des pourcentages et des grands nombres, ou pour les expliciter, utiliser des mots comme \"peu de\", beaucoup de\".",
+      "wcag_rgaa": null,
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "regex",
+        "params": {
+          "percent_pattern": "\\d+\\s?%",
+          "large_number_min": 1000
+        }
+      },
+      "violation_definition": "Percentage or large number not explained in words.",
+      "llm_instruction_fr": "Limite les pourcentages et les grands nombres. Explique-les avec des mots comme « peu de », « beaucoup de ».",
+      "notes": "Overlaps with the preservation check: if replaced, the original figure must stay recoverable."
+    },
+    {
+      "id": "CPM21",
+      "category": "sentence_and_word_construction",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Il ne faut pas utiliser de caractères spéciaux. Ce critère est-il respecté ?",
+      "explanation_fr": "Exemples de caractères spéciaux à ne plus utiliser : &, <, ?, #",
+      "wcag_rgaa": null,
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "regex",
+        "params": {
+          "forbidden_chars": [
+            "&",
+            "<",
+            ">",
+            "?",
+            "#"
+          ]
+        }
+      },
+      "violation_definition": "Special character detected.",
+      "llm_instruction_fr": "N'utilise pas de caractères spéciaux comme &, <, ? ou #.",
+      "notes": "The checklist lists '?' as a special character; confirm that this also applies to real questions."
+    },
+    {
+      "id": "I1",
+      "category": "illustrations",
+      "priority": "++",
+      "weight": 2,
+      "criterion_fr": "Y a-t-il des exemples pour illustrer les idées complexes ?",
+      "explanation_fr": "Un bon exemple est souvent plus parlant qu'un long discours.",
+      "wcag_rgaa": null,
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "llm_judge",
+        "question": "Are complex ideas illustrated with examples?"
+      },
+      "violation_definition": "Complex idea without an example.",
+      "llm_instruction_fr": "Ajoute un exemple pour les idées complexes."
+    },
+    {
+      "id": "I2",
+      "category": "illustrations",
+      "priority": "++",
+      "weight": 2,
+      "criterion_fr": "Les exemples sont-ils au maximum tirés de la vie quotidienne ?",
+      "explanation_fr": "Les personnes handicapées ont besoin de faire des liens avec ce qu'elles connaissent. Il est important de pouvoir s'appuyer sur leur vécu pour faciliter leur compréhension.",
+      "wcag_rgaa": null,
+      "applies_to": "document",
+      "check_mode": "semi_automatic",
+      "phase": 2,
+      "detector": {
+        "type": "llm_judge",
+        "question": "Are examples taken from everyday life?"
+      },
+      "violation_definition": "Examples are abstract or far from daily life."
+    },
+    {
+      "id": "I3",
+      "category": "illustrations",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "Y a-t-il des images pour aider les gens à comprendre de quoi parle le texte ?",
+      "explanation_fr": "Les images ne remplacent pas le texte mais sont là pour aider à la compréhension et faciliter la mémorisation.",
+      "wcag_rgaa": null,
+      "applies_to": "image",
+      "check_mode": "human",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "image_presence",
+        "future": true
+      },
+      "violation_definition": "No images helping comprehension."
+    },
+    {
+      "id": "I4",
+      "category": "illustrations",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Les images sont-elles adaptées aux personnes concernées ?",
+      "explanation_fr": "Il ne faut pas utiliser des images enfantines pour illustrer des documents à destionation d'un public adulte.",
+      "wcag_rgaa": null,
+      "applies_to": "image",
+      "check_mode": "human",
+      "phase": "out_of_scope",
+      "detector": null,
+      "violation_definition": "Images not suited to the audience (e.g. childish)."
+    },
+    {
+      "id": "I5",
+      "category": "illustrations",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Les images sont-elles claires, faciles à comprendre et en lien avec le texte?",
+      "explanation_fr": "Les images doivent toujours soutenir la comréhension du texte. Ne mettez as des illustration de décor.",
+      "wcag_rgaa": null,
+      "applies_to": "image",
+      "check_mode": "human",
+      "phase": "out_of_scope",
+      "detector": null,
+      "violation_definition": "Images unclear, decorative or unrelated to the text."
+    },
+    {
+      "id": "I6",
+      "category": "illustrations",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Le même style d'images est-il utilisé tout au long du document ?",
+      "explanation_fr": "Il faut éviter de mélanger différents styles d'images dans le même document. Si vous décidez d'utiliser des photos, il faut utiliser des photos dans tout le document.",
+      "wcag_rgaa": null,
+      "applies_to": "image",
+      "check_mode": "human",
+      "phase": "out_of_scope",
+      "detector": null,
+      "violation_definition": "Mixed image styles in one document."
+    },
+    {
+      "id": "I7",
+      "category": "illustrations",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "La même image est-elle utilisée pour décrire la même chose tout au long du document ?",
+      "explanation_fr": "Comme our les mots une image fait référence à une seule idée.",
+      "wcag_rgaa": null,
+      "applies_to": "image",
+      "check_mode": "human",
+      "phase": "out_of_scope",
+      "detector": null,
+      "violation_definition": "Same idea shown with different images."
+    },
+    {
+      "id": "I8",
+      "category": "illustrations",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "On peut utiliser des graphiques et des tableaux simples et légendés. Ce critère est-il respecté ?",
+      "explanation_fr": "Un graphique ou un tableau peuvent parfois éviter un long discours et expliquer les choses mieux qu'un texte. Il faut cependant que le graphique soit simple et expliqué.",
+      "wcag_rgaa": null,
+      "applies_to": "image",
+      "check_mode": "human",
+      "phase": "out_of_scope",
+      "detector": null,
+      "violation_definition": "Complex or unlabeled chart or table."
+    },
+    {
+      "id": "MP1",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Il ne faut pas utiliser d'arrière-plan car cela rend le texte difficile à lire. Ce critère est-il respecté ?",
+      "explanation_fr": "Il faut éviter tout ce qui peut gêner la concentration du lecteur.",
+      "wcag_rgaa": "Correspondance étendue WCAG : 1.4.8, 2.2.2 RGAA : 10.8 (personnalisation), 3.3 et 3.4 (contrastes), 13.17 (contenus en mouvement ou clignotant)",
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "background": "none"
+        }
+      },
+      "violation_definition": "Background behind the text."
+    },
+    {
+      "id": "MP2",
+      "category": "layout",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "Le style de l'écriture est-il clair et facile à lire ?",
+      "explanation_fr": "Il faut choisir une police bâton sans empattement, pas trop serrée. Privilégier les polices comme TAHOMA, ARIAL ou VERDANA. Il ne faut pas utiliser d'italique, ou de souligné.",
+      "wcag_rgaa": "Correspondance partielle WCAG : 1.4.8 RGAA : 10.8 (personnalisation)",
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "allowed_fonts": [
+            "Arial",
+            "Tahoma",
+            "Verdana"
+          ],
+          "italic": false,
+          "underline": false
+        }
+      },
+      "violation_definition": "Non-sans-serif font, italics or underline."
+    },
+    {
+      "id": "MP3",
+      "category": "layout",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "L'écriture est-elle assez grande ?",
+      "explanation_fr": "Il faut utiliser une police équivalente à ARIAL 14.",
+      "wcag_rgaa": "Correspondance partielle WCAG : SC 1.4.8 (présentation visuelle) RGAA : 10.10",
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "min_font_size_pt": 14
+        }
+      },
+      "violation_definition": "Font smaller than Arial 14."
+    },
+    {
+      "id": "MP4",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Y a-t-il uniquement un type d'écriture dans le texte ?",
+      "explanation_fr": "Il faut n'utiliser qu'une seule police simple. On pourra néanmoins jouer sur les tailles et le gras.",
+      "wcag_rgaa": null,
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "max_font_families": 1
+        }
+      },
+      "violation_definition": "More than one font family."
+    },
+    {
+      "id": "MP5",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Il ne faut pas écrire de mots entiers en capitales en dehors de titres courts. Ce critère est-il respecté ?",
+      "explanation_fr": "L'écriture en majuscules fatigue les yeux.",
+      "wcag_rgaa": null,
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "regex",
+        "params": {
+          "pattern": "fully uppercase words of 2+ letters",
+          "allowed": "short titles only",
+          "max_title_words": 6
+        }
+      },
+      "violation_definition": "Full words in capitals outside short titles.",
+      "llm_instruction_fr": "N'écris pas de mots entiers en majuscules, sauf dans un titre court."
+    },
+    {
+      "id": "MP6",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Si des couleurs sont utilisées, un contraste minimum entre chaque couleur est-il respecté ?",
+      "explanation_fr": "Il faut respecter un contraste de 70 % entre 2 couleurs. Il ne faut pas oublier que les documents peuvent être photocopiés ou imprimés en niveaux de gris.",
+      "wcag_rgaa": "WCAG : 1.4.3, 1.4.6 RGAA : 3.3, 3.4 et 10.6",
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "min_contrast_percent": 70
+        }
+      },
+      "violation_definition": "Insufficient colour contrast."
+    },
+    {
+      "id": "MP7",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Il ne faut pas utiliser de chiffres romains. Ce critère est-il respecté ?",
+      "explanation_fr": "Les chiffres romains, comme VI, IX ou XVI, sont difficiles à lire.",
+      "wcag_rgaa": null,
+      "applies_to": "sentence",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "regex",
+        "params": {
+          "pattern": "^(?=[MDCLXVI])M*(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$",
+          "min_length": 2,
+          "case_sensitive": true
+        }
+      },
+      "violation_definition": "Roman numeral detected.",
+      "llm_instruction_fr": "N'utilise pas de chiffres romains. Écris en chiffres 1, 2, 3.",
+      "examples": {
+        "bad": "VI; IX; XVI",
+        "good": null
+      },
+      "notes": "Check against a French word list to avoid false positives on uppercase acronyms."
+    },
+    {
+      "id": "MP8",
+      "category": "layout",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "Les nouvelles phrases commencent‑elles toujours sur une nouvelle ligne ?",
+      "explanation_fr": null,
+      "wcag_rgaa": null,
+      "applies_to": "document",
+      "check_mode": "automatic",
+      "phase": 1,
+      "detector": {
+        "type": "output_formatting",
+        "tool": "sentence splitter",
+        "params": {
+          "sentences_per_line": 1
+        }
+      },
+      "violation_definition": "A line contains more than one sentence.",
+      "llm_instruction_fr": "Commence chaque nouvelle phrase sur une nouvelle ligne.",
+      "notes": "Hermes controls its own output, so this rule can be enforced by formatting, not just checked."
+    },
+    {
+      "id": "MP9",
+      "category": "layout",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "Il ne faut pas couper les mots sur 2 lignes. Ce critère est-il respecté ?",
+      "explanation_fr": "Les césures rendent la lecture difficile.",
+      "wcag_rgaa": null,
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "hyphenation": false
+        }
+      },
+      "violation_definition": "Words split across two lines."
+    },
+    {
+      "id": "MP10",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "La première ligne des paragraphes est-elle bien alignée au reste du texte ?",
+      "explanation_fr": "Ne faites pas de retrait au début de chaque paragraphe",
+      "wcag_rgaa": null,
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "first_line_indent": 0
+        }
+      },
+      "violation_definition": "Indented first line of paragraphs."
+    },
+    {
+      "id": "MP11",
+      "category": "layout",
+      "priority": "++",
+      "weight": 2,
+      "criterion_fr": "Le texte est-il aligné à gauche ?",
+      "explanation_fr": "N'utilisez pas les options de texte \"aligné à droite\", ou \"centré\" en dehors de titres courts. Ne justifiez pas vos textes.",
+      "wcag_rgaa": "Correspondance partielle WCAG : SC 1.4.8 RGAA : 10.9",
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "alignment": "left",
+          "justify": false
+        }
+      },
+      "violation_definition": "Text not left-aligned or justified."
+    },
+    {
+      "id": "MP12",
+      "category": "layout",
+      "priority": "+++",
+      "weight": 3,
+      "criterion_fr": "Il ne faut pas mettre trop de texte sur une même page. Ce critère est-il respecté ?",
+      "explanation_fr": "Un texte aéré donne plus envie et facilite la compréhension.",
+      "wcag_rgaa": null,
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "max_words_per_page": null,
+          "status": "to_define"
+        }
+      },
+      "violation_definition": "Too much text on a page."
+    },
+    {
+      "id": "MP13",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Il ne faut pas écrire en colonnes. Ce critère est-il respecté ?",
+      "explanation_fr": "La lecture en colonnes est source d'erreurs et de perte de concentration.",
+      "wcag_rgaa": null,
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "columns": 1
+        }
+      },
+      "violation_definition": "Text written in columns."
+    },
+    {
+      "id": "MP14",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Les marges sont-elles larges et aérées ?",
+      "explanation_fr": "A titre indicatif, les marges d'un document sous Word peuvent être de 2 ou 2,5 cm au minimum (haut, bas, droite et gauche).",
+      "wcag_rgaa": null,
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "min_margin_cm": 2
+        }
+      },
+      "violation_definition": "Margins smaller than 2 cm."
+    },
+    {
+      "id": "MP15",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Le format est-il facile à lire, à manipuler et à photocopier ?",
+      "explanation_fr": "Il faut toujours penser à l'usage qui sera fait du document. Un document peut mieux être diffusé s'il est facile à photocopier et dans un format facile à manipuler.",
+      "wcag_rgaa": null,
+      "applies_to": "layout",
+      "check_mode": "human",
+      "phase": "out_of_scope",
+      "detector": null,
+      "violation_definition": "Format hard to read, handle or photocopy."
+    },
+    {
+      "id": "MP16",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Si votre document fait plusieurs pages, les pages sont-elles numérotées ?",
+      "explanation_fr": null,
+      "wcag_rgaa": null,
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "page_numbers": true
+        }
+      },
+      "violation_definition": "Multi-page document without page numbers."
+    },
+    {
+      "id": "MP17",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "Avez-vous mis le logo \"facile à lire \" sur la couverture de votre document Facile à lire et à comprendre ?",
+      "explanation_fr": "Le logo est indispensable pour repérer rapidement un document Facile à Lire et à comprendre.",
+      "wcag_rgaa": null,
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "easy_to_read_logo_on_cover": true
+        }
+      },
+      "violation_definition": "'Facile à lire' logo missing on the cover."
+    },
+    {
+      "id": "MP18",
+      "category": "layout",
+      "priority": "+",
+      "weight": 1,
+      "criterion_fr": "L’interlignage doit être au moins de 1,5, cette règle est‑elle respectée ?",
+      "explanation_fr": null,
+      "wcag_rgaa": "Correspondance partielle WCAG : SC 1.4.8 et 1.4.12 (WCAG 2.1) RGAA : 10.12",
+      "applies_to": "layout",
+      "check_mode": "automatic",
+      "phase": "out_of_scope",
+      "detector": {
+        "type": "document_format_inspection",
+        "future": true,
+        "params": {
+          "min_line_spacing": 1.5
+        }
+      },
+      "violation_definition": "Line spacing below 1.5."
+    }
+  ]
+}
