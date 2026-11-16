@@ -1,13 +1,27 @@
 import csv, json, random, sys, time, warnings
-warnings.filterwarnings("ignore")
-sys.path.insert(0,".")
-import spacy, falc_checker as fc
+from pathlib import Path
 
-N = int(sys.argv[1]); SEED = 42
-book, rules = fc.load_rulebook("falc_rulebook.json")
+warnings.filterwarnings("ignore")
+
+import spacy
+from validators import falc_checker as fc
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+N = int(sys.argv[1]) if len(sys.argv) > 1 else 100
+SEED = 42
+
+book, rules = fc.load_rulebook(
+    str(PROJECT_ROOT / "config" / "falc_rulebook.json")
+)
+
 nlp = spacy.load("fr_core_news_md")
 
-rows = list(csv.reader(open("wivico_dataset_v2.tsv", encoding="utf-8"), delimiter="\t"))[1:]
+rows = list(csv.reader(
+    open(PROJECT_ROOT / "data" / "wivico_dataset_v2.tsv", encoding="utf-8"),
+    delimiter="\t"
+))[1:]
+
 random.Random(SEED).shuffle(rows)
 rows = rows[:N]
 

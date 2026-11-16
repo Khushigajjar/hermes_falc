@@ -7,7 +7,7 @@ from pathlib import Path
 import spacy
 from wordfreq import zipf_frequency
 
-RULEBOOK = Path(__file__).with_name("falc_rulebook.json")
+RULEBOOK = Path(__file__).parent.parent / "config" / "falc_rulebook.json"
 
 # --------------------------------------------------------------------------- seed lists
 # Seed lists
@@ -18,7 +18,10 @@ TEXTO = {"jtm", "mdr", "slt", "bjr", "stp", "svp", "pk", "koi", "cc", "pq", "tkt
 ABBREV = re.compile(
     r"(?<![\w])(Dr|Pr|Me|Mme|Mlle|M\.|etc\.|cf\.|c\.-à-d\.|ex\.|env\.|tél\.|St\.|Ste\.|av\.|bd\.)(?![\w])")
 NEG_WORDS = {"pas", "plus", "jamais", "rien", "personne", "aucun", "aucune", "guère"}
-DATE_NUMERIC = re.compile(r"\b\d{1,2}[/.\-]\d{1,2}[/.\-]\d{2,4}\b|\b\d{4}-\d{2}-\d{2}\b")
+DATE_NUMERIC = re.compile(
+    r"\b\d{1,2}[./-]\d{1,2}[./-]\d{2,4}\b"
+    r"|\b\d{4}-\d{2}-\d{2}\b"
+)
 PERCENT = re.compile(r"\d+(?:[.,]\d+)?\s?%|pour cent", re.I)
 LARGE_NUMBER = re.compile(r"\b\d{1,3}(?:[ \u00a0.]\d{3})+\b|\b\d{4,}\b")
 ROMAN = None 
@@ -47,30 +50,101 @@ def predicate_count(sent):
     return n
 
 
+def spacy_analysis(sent):
+    """
+    Return linguistic annotations produced by spaCy.
+    These annotations support the FALC diagnostic rules.
+    """
+
+    tokens = []
+
+    for token in sent:
+        if token.is_space or token.is_punct:
+            continue
+
+        tokens.append({
+            "word": token.text,
+            "lemma": token.lemma_,
+            "pos": token.pos_,
+            "fine_pos": token.tag_,
+            "dependency": token.dep_,
+            "head": token.head.text,
+            "morphology": str(token.morph)
+        })
+
+    return {
+        "sentence": sent.text.strip(),
+        "word_count": sum(token.is_alpha for token in sent),
+        "finite_predicates": predicate_count(sent),
+        "tokens": tokens
+    }
+
+
 # --------------------------------------------------------------------------- sentence rules
-# Each function takes (rule, sent) and returns a list of findings.
+# CPM1: Sentence length and grammatical complexity
 def cpm1(rule, sent):
     p = params(rule)
+
     words = [t for t in sent if t.is_alpha]
+    word_count = len(words)
+
     preds = predicate_count(sent)
+
+    max_words = p.get("max_words", 15)
+    max_preds = p.get("max_finite_verbs", 1)
+
     out = []
-    if len(words) > p.get("max_words", 15):
-        out.append(finding(rule, f"{len(words)} words (max {p.get('max_words', 15)})"))
-    if preds > p.get("max_finite_verbs", 1):
-        out.append(finding(rule, f"{preds} verbal predicates (max {p.get('max_finite_verbs', 1)})"))
+
+    if word_count > max_words:
+        out.append(
+            finding(
+                rule,
+                f"Sentence contains {word_count} words; "
+                f"recommended maximum is {max_words}"
+            )
+        )
+
+    if preds > max_preds:
+        out.append(
+            finding(
+                rule,
+                f"Sentence contains {preds} verbal predicates; "
+                f"recommended maximum is {max_preds}"
+            )
+        )
+
     return out
 
-
+# CPM2: Vocabulary difficulty using word frequency
 def cpm2(rule, sent):
-    # word frequency
     p = params(rule)
-    thr = p.get("min_zipf_frequency", 3.5)
+    threshold = p.get("min_zipf_frequency", 3.5)
+
     out = []
-    for t in sent:
-        if t.pos_ in ("NOUN", "VERB", "ADJ", "ADV") and t.is_alpha:
-            f = zipf_frequency(t.lemma_.lower(), "fr")
-            if f < thr:
-                out.append(finding(rule, f"'{t.text}' rare word (zipf {f:.2f} < {thr})", t))
+
+    for token in sent:
+        if token.pos_ not in ("NOUN", "VERB", "ADJ", "ADV"):
+            continue
+
+        if not token.is_alpha:
+            continue
+
+        lemma = token.lemma_.lower()
+        frequency = zipf_frequency(lemma, "fr")
+
+        if frequency < threshold:
+            out.append(
+                finding(
+                    rule,
+                    (
+                        f"Potentially difficult vocabulary: '{token.text}' "
+                        f"(lemma: '{lemma}', Zipf frequency: "
+                        f"{frequency:.2f}, minimum: {threshold})"
+                    ),
+                    token
+                )
+            )
+
     return out
 
 
@@ -88,17 +162,73 @@ def cpm9(rule, sent):
 
 def cpm12(rule, sent):
     p = params(rule)
-    has_ne = any(t.lower_ in ("ne", "n'", "n’") for t in sent)
-    negs = [t for t in sent if (t.lower_ in NEG_WORDS and has_ne) or t.lower_ == "sans"]
-    if len(negs) > p.get("max_negations_per_sentence", 1):
-        return [finding(rule, f"{len(negs)} negations: " + ", ".join(t.text for t in negs), negs[0])]
+    negations = []
+
+    tokens = [t.lower_ for t in sent]
+
+    # Detect ne ... negative marker
+    has_ne = any(t in ("ne", "n'") for t in tokens)
+
+    if has_ne:
+        for token in sent:
+            if token.lower_ in NEG_WORDS:
+                negations.append(token)
+
+        # Detect restrictive ne ... que
+        if "que" in tokens:
+            negations.append(next(t for t in sent if t.lower_ == "que"))
+
+    # Detect sans constructions
+    for token in sent:
+        if token.lower_ == "sans":
+            negations.append(token)
+
+    max_negations = p.get("max_negations_per_sentence", 1)
+
+    if len(negations) > max_negations:
+        return [
+            finding(
+                rule,
+                f"{len(negations)} negative constructions detected: "
+                + ", ".join(t.text for t in negations),
+                negations[0]
+            )
+        ]
+
     return []
 
 
+# CPM13: Passive voice detection using spaCy dependency parsing
 def cpm13(rule, sent):
-    # spaCy fr marks passives with nsubj:pass, aux:pass and often obl:agent.
-    return [finding(rule, f"passive construction around '{t.text}'", t)
-            for t in sent if t.dep_ in ("nsubj:pass", "aux:pass", "obl:agent")][:1]
+    passive_subjects = [
+        t for t in sent if t.dep_ == "nsubj:pass"
+    ]
+
+    passive_auxiliaries = [
+        t for t in sent if t.dep_ == "aux:pass"
+    ]
+
+    agents = [
+        t for t in sent if t.dep_ == "obl:agent"
+    ]
+
+    if not passive_subjects and not passive_auxiliaries:
+        return []
+
+    subject = passive_subjects[0].text if passive_subjects else "unknown"
+    verb = next(
+        (t.head.text for t in passive_subjects),
+        passive_auxiliaries[0].head.text if passive_auxiliaries else "unknown"
+    )
+    agent = agents[0].text if agents else "not explicitly identified"
+
+    evidence = (
+        f"Passive construction detected: "
+        f"subject='{subject}', verb='{verb}', agent='{agent}'"
+    )
+
+    return [finding(rule, evidence, passive_subjects[0]
+                    if passive_subjects else passive_auxiliaries[0])]
 
 
 def cpm14(rule, sent):
@@ -185,7 +315,9 @@ def check_text(text, nlp, book, rules):
     for li, line in enumerate(lines, 1):
         doc = nlp(line)
         sents = [s for s in doc.sents if sum(t.is_alpha for t in s) >= 2]
-        if len(sents) > 1:
+        
+        max_sentences = rules["MP8"]["detector"]["params"]["sentences_per_line"]
+        if len(sents) > max_sentences:
             mp8_findings.append({"rule_id": "MP8", "evidence": f"line {li} has {len(sents)} sentences",
                                  "char_start": None})
         for s in sents:
@@ -199,8 +331,14 @@ def check_text(text, nlp, book, rules):
             for f in fn(rules[rid], s):
                 fails.append(f)
                 failed_rules.setdefault(rid, []).append(f)
-        report_sents.append({"sentence_id": f"s{idx}", "line": li, "text": s.text.strip(),
-                             "failures": fails})
+        report_sents.append({
+            "sentence_id": f"s{idx}",
+            "line": li,
+            "text": s.text.strip(),
+            "failures": fails,
+
+            "spacy_analysis": spacy_analysis(s)
+        })
     if mp8_findings:
         failed_rules["MP8"] = mp8_findings
 
@@ -239,6 +377,24 @@ def print_report(rep, rules):
             print(f"        - {f['rule_id']} ({rules[f['rule_id']]['priority']}): {f['evidence']}")
     for f in rep["document_level"]:
         print(f"[FAIL] document: {f['rule_id']} - {f['evidence']}")
+
+    for s in rep["sentences"]:
+        analysis = s["spacy_analysis"]
+
+        print(
+            f"        spaCy: "
+            f'{analysis["word_count"]} words | '
+            f'{analysis["finite_predicates"]} finite predicates'
+        )
+
+        for token in analysis["tokens"]:
+            print(
+                f'          {token["word"]:15} '
+                f'Lemma: {token["lemma"]:15} '
+                f'POS: {token["pos"]:8} '
+                f'Dep: {token["dependency"]:12} '
+                f'Head: {token["head"]}'
+            )
 
 
 def main():
